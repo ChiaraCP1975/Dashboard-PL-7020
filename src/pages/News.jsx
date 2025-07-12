@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
+import AccessControl from '../components/AccessControl';
 import { useNews } from '../contexts/NewsContext';
 import * as FiIcons from 'react-icons/fi';
 
@@ -37,13 +38,17 @@ const News = () => {
           <h1 className="text-3xl font-bold text-gray-900">News</h1>
           <p className="text-gray-600 mt-2">Comunicazioni e notizie per il personale</p>
         </div>
-        <Link
-          to="/news/add"
-          className="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
-          Nuova News
-        </Link>
+        <div className="mt-4 sm:mt-0 flex space-x-3">
+          <AccessControl permission="create_news">
+            <Link
+              to="/news/add"
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
+              Nuova News
+            </Link>
+          </AccessControl>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -51,7 +56,10 @@ const News = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <div className="relative">
-              <SafeIcon icon={FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <SafeIcon
+                icon={FiSearch}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              />
               <input
                 type="text"
                 placeholder="Cerca news..."
@@ -61,7 +69,6 @@ const News = () => {
               />
             </div>
           </div>
-
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -75,7 +82,6 @@ const News = () => {
             ))}
           </select>
         </div>
-
         <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
           <span>
             {filteredNews.length} di {news.length} news
@@ -103,11 +109,15 @@ const News = () => {
                     <h3 className="text-xl font-semibold text-gray-900">
                       {item.title}
                     </h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      item.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                      item.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        item.priority === 'alta'
+                          ? 'bg-red-100 text-red-700'
+                          : item.priority === 'media'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}
+                    >
                       {item.priority}
                     </span>
                   </div>
@@ -126,13 +136,15 @@ const News = () => {
                   </div>
                 </div>
                 <div className="flex space-x-1">
-                  <Link
-                    to={`/news/edit/${item.id}`}
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Modifica news"
-                  >
-                    <SafeIcon icon={FiEdit} className="w-4 h-4" />
-                  </Link>
+                  <AccessControl permission="edit_news">
+                    <Link
+                      to={`/news/edit/${item.id}`}
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Modifica news"
+                    >
+                      <SafeIcon icon={FiEdit} className="w-4 h-4" />
+                    </Link>
+                  </AccessControl>
                   <Link
                     to={`/news/${item.id}`}
                     className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -140,20 +152,20 @@ const News = () => {
                   >
                     <SafeIcon icon={FiEye} className="w-4 h-4" />
                   </Link>
-                  <button
-                    onClick={() => setShowDeleteConfirm(item.id)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Elimina news"
-                  >
-                    <SafeIcon icon={FiTrash2} className="w-4 h-4" />
-                  </button>
+                  <AccessControl permission="delete_news">
+                    <button
+                      onClick={() => setShowDeleteConfirm(item.id)}
+                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Elimina news"
+                    >
+                      <SafeIcon icon={FiTrash2} className="w-4 h-4" />
+                    </button>
+                  </AccessControl>
                 </div>
               </div>
-
               <p className="text-gray-700 leading-relaxed mb-4">
                 {item.content.length > 300 ? `${item.content.substring(0, 300)}...` : item.content}
               </p>
-
               {item.tags && item.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map(tag => (
@@ -178,16 +190,17 @@ const News = () => {
           <p className="text-gray-600 mb-6">
             {searchQuery || selectedCategory
               ? 'Prova a modificare i filtri di ricerca'
-              : 'Inizia aggiungendo la tua prima news'
-            }
+              : 'Inizia aggiungendo la tua prima news'}
           </p>
-          <Link
-            to="/news/add"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
-            Nuova News
-          </Link>
+          <AccessControl permission="create_news">
+            <Link
+              to="/news/add"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
+              Nuova News
+            </Link>
+          </AccessControl>
         </div>
       )}
 

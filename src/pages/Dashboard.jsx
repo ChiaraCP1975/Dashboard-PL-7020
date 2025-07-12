@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
+import AccessControl from '../components/AccessControl';
 import { useDocuments } from '../contexts/DocumentContext';
 import { useNews } from '../contexts/NewsContext';
 import * as FiIcons from 'react-icons/fi';
@@ -14,6 +15,7 @@ const Dashboard = () => {
 
   const recentDocuments = documents.slice(0, 5);
   const recentNews = news.slice(0, 5);
+
   const highPriorityItems = [...documents, ...news]
     .filter(item => item.priority === 'alta')
     .slice(0, 3);
@@ -51,12 +53,7 @@ const Dashboard = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
@@ -78,10 +75,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Stats */}
-      <motion.div 
-        variants={itemVariants}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <div
             key={stat.name}
@@ -109,35 +103,39 @@ const Dashboard = () => {
       <motion.div variants={itemVariants}>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            to="/documents/add"
-            className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all group"
-          >
-            <div className="text-center">
-              <SafeIcon icon={FiPlus} className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mx-auto mb-2" />
-              <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-700">
-                Nuovo Documento
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">
-                Aggiungi ordinanza, modello o circolare
-              </p>
-            </div>
-          </Link>
+          <AccessControl permission="create_document">
+            <Link
+              to="/documents/add"
+              className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+            >
+              <div className="text-center">
+                <SafeIcon icon={FiPlus} className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mx-auto mb-2" />
+                <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-700">
+                  Nuovo Documento
+                </h3>
+                <p className="text-gray-500 text-sm mt-1">
+                  Aggiungi ordinanza, modello o circolare
+                </p>
+              </div>
+            </Link>
+          </AccessControl>
 
-          <Link
-            to="/news/add"
-            className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-green-500 hover:bg-green-50 transition-all group"
-          >
-            <div className="text-center">
-              <SafeIcon icon={FiPlus} className="w-8 h-8 text-gray-400 group-hover:text-green-500 mx-auto mb-2" />
-              <h3 className="text-lg font-medium text-gray-900 group-hover:text-green-700">
-                Nuova News
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">
-                Pubblica un nuovo comunicato
-              </p>
-            </div>
-          </Link>
+          <AccessControl permission="create_news">
+            <Link
+              to="/news/add"
+              className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-green-500 hover:bg-green-50 transition-all group"
+            >
+              <div className="text-center">
+                <SafeIcon icon={FiPlus} className="w-8 h-8 text-gray-400 group-hover:text-green-500 mx-auto mb-2" />
+                <h3 className="text-lg font-medium text-gray-900 group-hover:text-green-700">
+                  Nuova News
+                </h3>
+                <p className="text-gray-500 text-sm mt-1">
+                  Pubblica un nuovo comunicato
+                </p>
+              </div>
+            </Link>
+          </AccessControl>
         </div>
       </motion.div>
 
@@ -148,10 +146,7 @@ const Dashboard = () => {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Documenti Recenti</h3>
-                <Link
-                  to="/documents"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
+                <Link to="/documents" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                   Vedi tutti
                 </Link>
               </div>
@@ -174,11 +169,15 @@ const Dashboard = () => {
                             {new Date(doc.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          doc.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                          doc.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-green-100 text-green-700'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            doc.priority === 'alta'
+                              ? 'bg-red-100 text-red-700'
+                              : doc.priority === 'media'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
                           {doc.priority}
                         </span>
                       </div>
@@ -198,10 +197,7 @@ const Dashboard = () => {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">News Recenti</h3>
-                <Link
-                  to="/news"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
+                <Link to="/news" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                   Vedi tutte
                 </Link>
               </div>
@@ -224,11 +220,15 @@ const Dashboard = () => {
                             {new Date(item.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          item.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                          item.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-green-100 text-green-700'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            item.priority === 'alta'
+                              ? 'bg-red-100 text-red-700'
+                              : item.priority === 'media'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
                           {item.priority}
                         </span>
                       </div>
@@ -263,9 +263,9 @@ const Dashboard = () => {
                       <h4 className="font-medium text-gray-900">{item.title}</h4>
                       <p className="text-sm text-gray-600">{item.category}</p>
                     </div>
-                    <SafeIcon 
-                      icon={item.type ? FiFileText : FiNewspaper} 
-                      className="w-4 h-4 text-red-600" 
+                    <SafeIcon
+                      icon={item.type ? FiFileText : FiNewspaper}
+                      className="w-4 h-4 text-red-600"
                     />
                   </div>
                 </Link>

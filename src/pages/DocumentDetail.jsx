@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
 import AttachmentViewer from '../components/AttachmentViewer';
 import { useDocuments } from '../contexts/DocumentContext';
+import { useAuth } from '../contexts/AuthContext';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowLeft, FiDownload, FiPrint, FiEdit, FiTrash2, FiCalendar, FiUser, FiTag, FiFileText } = FiIcons;
@@ -12,6 +13,7 @@ const DocumentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getDocument, deleteDocument } = useDocuments();
+  const { hasPermission } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const document = getDocument(id);
@@ -21,10 +23,7 @@ const DocumentDetail = () => {
       <div className="text-center py-12">
         <SafeIcon icon={FiFileText} className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">Documento non trovato</h3>
-        <Link
-          to="/documents"
-          className="text-blue-600 hover:text-blue-700"
-        >
+        <Link to="/documents" className="text-blue-600 hover:text-blue-700">
           Torna ai documenti
         </Link>
       </div>
@@ -32,15 +31,15 @@ const DocumentDetail = () => {
   }
 
   const handleExport = () => {
-    const attachmentsList = document.attachments?.length > 0 
+    const attachmentsList = document.attachments?.length > 0
       ? `\n\nAllegati:\n${document.attachments.map(att => `- ${att.name} (${att.size})`).join('\n')}`
       : '';
-    
-    const imagesList = document.images?.length > 0 
+
+    const imagesList = document.images?.length > 0
       ? `\n\nImmagini:\n${document.images.map(img => `- ${img.name}: ${img.url}`).join('\n')}`
       : '';
-    
-    const linksList = document.links?.length > 0 
+
+    const linksList = document.links?.length > 0
       ? `\n\nLink:\n${document.links.map(link => `- ${link.title}: ${link.url}${link.description ? ` (${link.description})` : ''}`).join('\n')}`
       : '';
 
@@ -52,11 +51,11 @@ Autore: ${document.author}
 Data Creazione: ${new Date(document.createdAt).toLocaleDateString()}
 Data Aggiornamento: ${new Date(document.updatedAt).toLocaleDateString()}
 Priorità: ${document.priority}
-Tags: ${document.tags.join(', ')}
+Tags: ${document.tags.join(',')}
 
 Contenuto:
 ${document.content}${attachmentsList}${imagesList}${linksList}
-    `;
+`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -80,6 +79,9 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
     navigate('/documents');
   };
 
+  const canEdit = hasPermission('edit_document');
+  const canDelete = hasPermission('delete_document');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -102,25 +104,30 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
                 {document.type}
               </span>
               <span>{document.category}</span>
-              <span className={`px-2 py-1 rounded-full ${
-                document.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                document.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-green-100 text-green-700'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full ${
+                  document.priority === 'alta'
+                    ? 'bg-red-100 text-red-700'
+                    : document.priority === 'media'
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-green-100 text-green-700'
+                }`}
+              >
                 {document.priority}
               </span>
             </div>
           </div>
         </div>
-
         <div className="flex items-center space-x-2 no-print">
-          <button
-            onClick={handleEdit}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title="Modifica documento"
-          >
-            <SafeIcon icon={FiEdit} className="w-5 h-5" />
-          </button>
+          {canEdit && (
+            <button
+              onClick={handleEdit}
+              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Modifica documento"
+            >
+              <SafeIcon icon={FiEdit} className="w-5 h-5" />
+            </button>
+          )}
           <button
             onClick={handleExport}
             className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -135,20 +142,21 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
           >
             <SafeIcon icon={FiPrint} className="w-5 h-5" />
           </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Elimina documento"
-          >
-            <SafeIcon icon={FiTrash2} className="w-5 h-5" />
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Elimina documento"
+            >
+              <SafeIcon icon={FiTrash2} className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Document Info */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Informazioni Documento</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
@@ -157,7 +165,6 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
               <p className="font-medium text-gray-900">{document.author}</p>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiCalendar} className="w-5 h-5 text-gray-400" />
             <div>
@@ -167,7 +174,6 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
               </p>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiCalendar} className="w-5 h-5 text-gray-400" />
             <div>
@@ -177,7 +183,6 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
               </p>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiTag} className="w-5 h-5 text-gray-400" />
             <div>
@@ -200,7 +205,6 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
       {/* Document Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Contenuto</h2>
-        
         <div className="prose max-w-none">
           <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
             {document.content}

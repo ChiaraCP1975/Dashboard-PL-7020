@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
 import AttachmentViewer from '../components/AttachmentViewer';
 import { useNews } from '../contexts/NewsContext';
+import { useAuth } from '../contexts/AuthContext';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowLeft, FiPrint, FiEdit, FiTrash2, FiCalendar, FiUser, FiTag, FiNewspaper } = FiIcons;
@@ -12,6 +13,7 @@ const NewsDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getNews, deleteNews } = useNews();
+  const { hasPermission } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const newsItem = getNews(id);
@@ -21,10 +23,7 @@ const NewsDetail = () => {
       <div className="text-center py-12">
         <SafeIcon icon={FiNewspaper} className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">News non trovata</h3>
-        <Link
-          to="/news"
-          className="text-blue-600 hover:text-blue-700"
-        >
+        <Link to="/news" className="text-blue-600 hover:text-blue-700">
           Torna alle news
         </Link>
       </div>
@@ -43,6 +42,9 @@ const NewsDetail = () => {
     deleteNews(id);
     navigate('/news');
   };
+
+  const canEdit = hasPermission('edit_news');
+  const canDelete = hasPermission('delete_news');
 
   return (
     <motion.div
@@ -65,25 +67,30 @@ const NewsDetail = () => {
               <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                 {newsItem.category}
               </span>
-              <span className={`px-2 py-1 rounded-full ${
-                newsItem.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                newsItem.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-green-100 text-green-700'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full ${
+                  newsItem.priority === 'alta'
+                    ? 'bg-red-100 text-red-700'
+                    : newsItem.priority === 'media'
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-green-100 text-green-700'
+                }`}
+              >
                 {newsItem.priority}
               </span>
             </div>
           </div>
         </div>
-
         <div className="flex items-center space-x-2 no-print">
-          <button
-            onClick={handleEdit}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title="Modifica news"
-          >
-            <SafeIcon icon={FiEdit} className="w-5 h-5" />
-          </button>
+          {canEdit && (
+            <button
+              onClick={handleEdit}
+              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Modifica news"
+            >
+              <SafeIcon icon={FiEdit} className="w-5 h-5" />
+            </button>
+          )}
           <button
             onClick={handlePrint}
             className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -91,20 +98,21 @@ const NewsDetail = () => {
           >
             <SafeIcon icon={FiPrint} className="w-5 h-5" />
           </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Elimina news"
-          >
-            <SafeIcon icon={FiTrash2} className="w-5 h-5" />
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Elimina news"
+            >
+              <SafeIcon icon={FiTrash2} className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* News Info */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Informazioni</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
@@ -113,7 +121,6 @@ const NewsDetail = () => {
               <p className="font-medium text-gray-900">{newsItem.author}</p>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiCalendar} className="w-5 h-5 text-gray-400" />
             <div>
@@ -123,7 +130,6 @@ const NewsDetail = () => {
               </p>
             </div>
           </div>
-
           <div className="flex items-center space-x-3">
             <SafeIcon icon={FiTag} className="w-5 h-5 text-gray-400" />
             <div>
@@ -150,7 +156,6 @@ const NewsDetail = () => {
       {/* News Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Contenuto</h2>
-        
         <div className="prose max-w-none">
           <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
             {newsItem.content}

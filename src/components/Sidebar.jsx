@@ -2,12 +2,15 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
+import AccessControl from './AccessControl';
+import { useAuth } from '../contexts/AuthContext';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiHome, FiFileText, FiNewspaper, FiPlus, FiX } = FiIcons;
+const { FiHome, FiFileText, FiNewspaper, FiPlus, FiX, FiUsers } = FiIcons;
 
 const Sidebar = ({ onClose }) => {
   const location = useLocation();
+  const { isAdmin } = useAuth();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: FiHome },
@@ -15,13 +18,22 @@ const Sidebar = ({ onClose }) => {
     { name: 'News', href: '/news', icon: FiNewspaper },
   ];
 
+  // Aggiungi gestione utenti solo per admin
+  if (isAdmin()) {
+    navigation.push({
+      name: 'Gestione Utenti',
+      href: '/users',
+      icon: FiUsers
+    });
+  }
+
   const isActive = (href) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="w-64 bg-white h-screen shadow-lg border-r border-gray-200 flex flex-col"
@@ -58,23 +70,27 @@ const Sidebar = ({ onClose }) => {
             Azioni Rapide
           </p>
           
-          <Link
-            to="/documents/add"
-            onClick={onClose}
-            className="flex items-center px-4 py-3 text-sm font-medium text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-          >
-            <SafeIcon icon={FiPlus} className="w-5 h-5 mr-3" />
-            Nuovo Documento
-          </Link>
-          
-          <Link
-            to="/news/add"
-            onClick={onClose}
-            className="flex items-center px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-          >
-            <SafeIcon icon={FiPlus} className="w-5 h-5 mr-3" />
-            Nuova News
-          </Link>
+          <AccessControl permission="create_document">
+            <Link
+              to="/documents/add"
+              onClick={onClose}
+              className="flex items-center px-4 py-3 text-sm font-medium text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-5 h-5 mr-3" />
+              Nuovo Documento
+            </Link>
+          </AccessControl>
+
+          <AccessControl permission="create_news">
+            <Link
+              to="/news/add"
+              onClick={onClose}
+              className="flex items-center px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-5 h-5 mr-3" />
+              Nuova News
+            </Link>
+          </AccessControl>
         </div>
       </nav>
     </motion.div>

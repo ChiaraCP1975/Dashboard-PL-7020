@@ -25,7 +25,6 @@ const EditDocument = () => {
     images: [],
     links: []
   });
-  
   const [currentTag, setCurrentTag] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -47,13 +46,16 @@ const EditDocument = () => {
   ];
 
   const categories = [
-    'Traffico',
+    'Viabilità',
     'Sicurezza',
     'Procedure',
     'Amministrativo',
     'Controllo Territorio',
     'Formazione',
-    'Emergenze'
+    'Emergenze',
+    'Disposizioni',
+    'Comunicazioni',
+    'Eventi'
   ];
 
   const priorities = [
@@ -64,10 +66,7 @@ const EditDocument = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const addTag = () => {
@@ -88,24 +87,15 @@ const EditDocument = () => {
   };
 
   const handleAttachmentsChange = (newAttachments) => {
-    setFormData(prev => ({
-      ...prev,
-      attachments: newAttachments
-    }));
+    setFormData(prev => ({ ...prev, attachments: newAttachments }));
   };
 
   const handleImagesChange = (newImages) => {
-    setFormData(prev => ({
-      ...prev,
-      images: newImages
-    }));
+    setFormData(prev => ({ ...prev, images: newImages }));
   };
 
   const handleLinksChange = (newLinks) => {
-    setFormData(prev => ({
-      ...prev,
-      links: newLinks
-    }));
+    setFormData(prev => ({ ...prev, links: newLinks }));
   };
 
   const handleSubmit = (e) => {

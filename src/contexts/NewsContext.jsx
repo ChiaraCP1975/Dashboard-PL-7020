@@ -32,28 +32,13 @@ export const NewsProvider = ({ children }) => {
           priority: 'alta',
           tags: ['controllo territorio', 'procedure', 'festivo'],
           attachments: [
-            {
-              id: '1',
-              name: 'disposizioni_territorio.pdf',
-              type: 'file',
-              size: '1.2 MB',
-              url: '#'
-            }
+            { id: '1', name: 'disposizioni_territorio.pdf', type: 'file', size: '1.2 MB', url: '#' }
           ],
           images: [
-            {
-              id: '1',
-              name: 'mappa_territori.jpg',
-              url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
-            }
+            { id: '1', name: 'mappa_territori.jpg', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400' }
           ],
           links: [
-            {
-              id: '1',
-              title: 'Portale Procedure Operative',
-              url: 'https://www.example.com/procedure',
-              description: 'Accesso alle procedure complete'
-            }
+            { id: '1', title: 'Portale Procedure Operative', url: 'https://www.example.com/procedure', description: 'Accesso alle procedure complete' }
           ]
         },
         {
@@ -67,36 +52,28 @@ export const NewsProvider = ({ children }) => {
           priority: 'media',
           tags: ['formazione', 'codice strada', 'corso'],
           attachments: [
-            {
-              id: '2',
-              name: 'programma_corso.pdf',
-              type: 'file',
-              size: '845 KB',
-              url: '#'
-            }
+            { id: '2', name: 'programma_corso.pdf', type: 'file', size: '845 KB', url: '#' }
           ],
           images: [],
           links: [
-            {
-              id: '2',
-              title: 'Iscrizioni Online',
-              url: 'https://www.example.com/iscrizioni',
-              description: 'Modulo per le iscrizioni al corso'
-            }
+            { id: '2', title: 'Iscrizioni Online', url: 'https://www.example.com/iscrizioni', description: 'Modulo per le iscrizioni al corso' }
           ]
         }
       ];
+
       setNews(sampleNews);
       localStorage.setItem('policeNews', JSON.stringify(sampleNews));
     }
   }, []);
 
   const saveNews = (newNews) => {
+    console.log("Saving news:", newNews);
     setNews(newNews);
     localStorage.setItem('policeNews', JSON.stringify(newNews));
   };
 
   const addNews = (newsItem) => {
+    console.log("Adding news:", newsItem);
     const newNewsItem = {
       ...newsItem,
       id: Date.now().toString(),
@@ -108,16 +85,22 @@ export const NewsProvider = ({ children }) => {
     };
     const newNewsList = [newNewsItem, ...news];
     saveNews(newNewsList);
+    return newNewsItem;
   };
 
   const updateNews = (id, updates) => {
-    const newNewsList = news.map(item =>
-      item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
+    console.log("Updating news:", id, updates);
+    const newNewsList = news.map(item => 
+      item.id === id 
+        ? { ...item, ...updates, updatedAt: new Date().toISOString() } 
+        : item
     );
     saveNews(newNewsList);
+    return newNewsList.find(item => item.id === id);
   };
 
   const deleteNews = (id) => {
+    console.log("Deleting news:", id);
     const newNewsList = news.filter(item => item.id !== id);
     saveNews(newNewsList);
   };
@@ -130,11 +113,11 @@ export const NewsProvider = ({ children }) => {
     if (!query) return news;
     
     const lowercaseQuery = query.toLowerCase();
-    return news.filter(item =>
-      item.title.toLowerCase().includes(lowercaseQuery) ||
-      item.content.toLowerCase().includes(lowercaseQuery) ||
-      item.category.toLowerCase().includes(lowercaseQuery) ||
-      item.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+    return news.filter(item => 
+      item.title.toLowerCase().includes(lowercaseQuery) || 
+      item.content.toLowerCase().includes(lowercaseQuery) || 
+      item.category.toLowerCase().includes(lowercaseQuery) || 
+      (item.tags && item.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)))
     );
   };
 

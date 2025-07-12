@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
+import AccessControl from '../components/AccessControl';
 import { useDocuments } from '../contexts/DocumentContext';
 import * as FiIcons from 'react-icons/fi';
 
@@ -24,15 +25,15 @@ const Documents = () => {
   const documentCategories = [...new Set(documents.map(doc => doc.category))];
 
   const exportDocument = (document) => {
-    const attachmentsList = document.attachments?.length > 0 
+    const attachmentsList = document.attachments?.length > 0
       ? `\n\nAllegati:\n${document.attachments.map(att => `- ${att.name} (${att.size})`).join('\n')}`
       : '';
-    
-    const imagesList = document.images?.length > 0 
+
+    const imagesList = document.images?.length > 0
       ? `\n\nImmagini:\n${document.images.map(img => `- ${img.name}: ${img.url}`).join('\n')}`
       : '';
-    
-    const linksList = document.links?.length > 0 
+
+    const linksList = document.links?.length > 0
       ? `\n\nLink:\n${document.links.map(link => `- ${link.title}: ${link.url}${link.description ? ` (${link.description})` : ''}`).join('\n')}`
       : '';
 
@@ -44,11 +45,11 @@ Autore: ${document.author}
 Data Creazione: ${new Date(document.createdAt).toLocaleDateString()}
 Data Aggiornamento: ${new Date(document.updatedAt).toLocaleDateString()}
 Priorità: ${document.priority}
-Tags: ${document.tags.join(', ')}
+Tags: ${document.tags.join(',')}
 
 Contenuto:
 ${document.content}${attachmentsList}${imagesList}${linksList}
-    `;
+`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -61,32 +62,30 @@ ${document.content}${attachmentsList}${imagesList}${linksList}
 
   const exportAllDocuments = () => {
     const content = filteredDocuments.map(doc => {
-      const attachmentsList = doc.attachments?.length > 0 
+      const attachmentsList = doc.attachments?.length > 0
         ? `\n\nAllegati:\n${doc.attachments.map(att => `- ${att.name} (${att.size})`).join('\n')}`
         : '';
-      
-      const imagesList = doc.images?.length > 0 
+
+      const imagesList = doc.images?.length > 0
         ? `\n\nImmagini:\n${doc.images.map(img => `- ${img.name}: ${img.url}`).join('\n')}`
         : '';
-      
-      const linksList = doc.links?.length > 0 
+
+      const linksList = doc.links?.length > 0
         ? `\n\nLink:\n${doc.links.map(link => `- ${link.title}: ${link.url}${link.description ? ` (${link.description})` : ''}`).join('\n')}`
         : '';
 
-      return `
-=====================================
+      return `=====================================
 Titolo: ${doc.title}
 Tipo: ${doc.type}
 Categoria: ${doc.category}
 Autore: ${doc.author}
 Data Creazione: ${new Date(doc.createdAt).toLocaleDateString()}
 Priorità: ${doc.priority}
-Tags: ${doc.tags.join(', ')}
+Tags: ${doc.tags.join(',')}
 
 Contenuto:
 ${doc.content}${attachmentsList}${imagesList}${linksList}
-=====================================
-      `;
+=====================================`;
     }).join('\n\n');
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -130,13 +129,15 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
             <SafeIcon icon={FiDownload} className="w-4 h-4 mr-2" />
             Esporta Tutti
           </button>
-          <Link
-            to="/documents/add"
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
-            Nuovo Documento
-          </Link>
+          <AccessControl permission="create_document">
+            <Link
+              to="/documents/add"
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
+              Nuovo Documento
+            </Link>
+          </AccessControl>
         </div>
       </div>
 
@@ -145,7 +146,10 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-2">
             <div className="relative">
-              <SafeIcon icon={FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <SafeIcon
+                icon={FiSearch}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              />
               <input
                 type="text"
                 placeholder="Cerca documenti..."
@@ -155,7 +159,6 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
               />
             </div>
           </div>
-          
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
@@ -168,7 +171,6 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
               </option>
             ))}
           </select>
-
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -182,7 +184,6 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
             ))}
           </select>
         </div>
-
         <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
           <span>
             {filteredDocuments.length} di {documents.length} documenti
@@ -217,11 +218,15 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
                   </div>
                 </div>
                 <div className="flex flex-col items-end space-y-1">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    document.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                    document.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      document.priority === 'alta'
+                        ? 'bg-red-100 text-red-700'
+                        : document.priority === 'media'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-green-100 text-green-700'
+                    }`}
+                  >
                     {document.priority}
                   </span>
                   {getAttachmentCount(document) > 0 && (
@@ -284,15 +289,16 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
                     </span>
                   )}
                 </div>
-
                 <div className="flex items-center space-x-1">
-                  <Link
-                    to={`/documents/edit/${document.id}`}
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Modifica documento"
-                  >
-                    <SafeIcon icon={FiEdit} className="w-4 h-4" />
-                  </Link>
+                  <AccessControl permission="edit_document">
+                    <Link
+                      to={`/documents/edit/${document.id}`}
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Modifica documento"
+                    >
+                      <SafeIcon icon={FiEdit} className="w-4 h-4" />
+                    </Link>
+                  </AccessControl>
                   <button
                     onClick={() => exportDocument(document)}
                     className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -307,13 +313,15 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
                   >
                     <SafeIcon icon={FiEye} className="w-4 h-4" />
                   </Link>
-                  <button
-                    onClick={() => setShowDeleteConfirm(document.id)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Elimina documento"
-                  >
-                    <SafeIcon icon={FiTrash2} className="w-4 h-4" />
-                  </button>
+                  <AccessControl permission="delete_document">
+                    <button
+                      onClick={() => setShowDeleteConfirm(document.id)}
+                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Elimina documento"
+                    >
+                      <SafeIcon icon={FiTrash2} className="w-4 h-4" />
+                    </button>
+                  </AccessControl>
                 </div>
               </div>
             </div>
@@ -328,16 +336,17 @@ ${doc.content}${attachmentsList}${imagesList}${linksList}
           <p className="text-gray-600 mb-6">
             {searchQuery || selectedType || selectedCategory
               ? 'Prova a modificare i filtri di ricerca'
-              : 'Inizia aggiungendo il tuo primo documento'
-            }
+              : 'Inizia aggiungendo il tuo primo documento'}
           </p>
-          <Link
-            to="/documents/add"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
-            Nuovo Documento
-          </Link>
+          <AccessControl permission="create_document">
+            <Link
+              to="/documents/add"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <SafeIcon icon={FiPlus} className="w-4 h-4 mr-2" />
+              Nuovo Documento
+            </Link>
+          </AccessControl>
         </div>
       )}
 

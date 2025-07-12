@@ -11,7 +11,6 @@ const { FiSave, FiArrowLeft, FiPlus, FiX } = FiIcons;
 const AddDocument = () => {
   const navigate = useNavigate();
   const { addDocument } = useDocuments();
-  
   const [formData, setFormData] = useState({
     title: '',
     type: 'ordinanza',
@@ -24,7 +23,6 @@ const AddDocument = () => {
     images: [],
     links: []
   });
-  
   const [currentTag, setCurrentTag] = useState('');
 
   const documentTypes = [
@@ -35,13 +33,16 @@ const AddDocument = () => {
   ];
 
   const categories = [
-    'Traffico',
+    'Viabilità',
     'Sicurezza',
     'Procedure',
     'Amministrativo',
     'Controllo Territorio',
     'Formazione',
-    'Emergenze'
+    'Emergenze',
+    'Disposizioni',
+    'Comunicazioni',
+    'Eventi'
   ];
 
   const priorities = [
@@ -52,48 +53,33 @@ const AddDocument = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const addTag = () => {
     if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, currentTag.trim()]
-      }));
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, currentTag.trim()] }));
       setCurrentTag('');
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
+    setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
   };
 
   const handleAttachmentsChange = (newAttachments) => {
-    setFormData(prev => ({
-      ...prev,
-      attachments: newAttachments
-    }));
+    setFormData(prev => ({ ...prev, attachments: newAttachments }));
+    console.log("Attachments updated:", newAttachments);
   };
 
   const handleImagesChange = (newImages) => {
-    setFormData(prev => ({
-      ...prev,
-      images: newImages
-    }));
+    setFormData(prev => ({ ...prev, images: newImages }));
+    console.log("Images updated:", newImages);
   };
 
   const handleLinksChange = (newLinks) => {
-    setFormData(prev => ({
-      ...prev,
-      links: newLinks
-    }));
+    setFormData(prev => ({ ...prev, links: newLinks }));
+    console.log("Links updated:", newLinks);
   };
 
   const handleSubmit = (e) => {
@@ -103,7 +89,9 @@ const AddDocument = () => {
       alert('Compila tutti i campi obbligatori');
       return;
     }
-
+    
+    console.log("Submitting document with data:", formData);
+    
     addDocument(formData);
     navigate('/documents');
   };
@@ -132,7 +120,6 @@ const AddDocument = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Informazioni Generali</h2>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -225,7 +212,6 @@ const AddDocument = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Contenuto</h2>
-          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Contenuto del documento *
@@ -254,7 +240,6 @@ const AddDocument = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Tag</h2>
-          
           <div className="space-y-4">
             <div className="flex space-x-2">
               <input
